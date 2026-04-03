@@ -7,35 +7,62 @@
   <style>
     body {
       font-family: Arial;
+      background: #f5f7fb;
       text-align: center;
-      margin-top: 50px;
+      margin: 0;
+      padding: 40px;
     }
-    input {
-      display: block;
-      margin: 10px auto;
-      padding: 10px;
-      width: 200px;
-    }
-    button {
-      padding: 10px 20px;
-      margin-top: 10px;
-    }
+
+```
+.container {
+  max-width: 400px;
+  margin: auto;
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+p {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+button {
+  width: 100%;
+  padding: 15px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.secondary {
+  background: #e5e7eb;
+}
+```
+
   </style>
 </head>
 <body>
 
-<h1>CITA</h1>
+<div class="container">
+  <h1>CITA</h1>
+  <p>מערכת לקביעת פגישות</p>
 
-<h2>הרשמה</h2>
-<input type="text" placeholder="שם מלא">
-<input type="email" placeholder="אימייל">
-<input type="password" placeholder="סיסמה">
-<button>הרשמה</button>
+<button class="primary">קביעת פגישה</button> <button class="secondary">כניסת מנהל</button>
 
-<h2>התחברות</h2>
-<input type="email" placeholder="אימייל">
-<input type="password" placeholder="סיסמה">
-<button>התחברות</button>
+</div>
 
 </body>
 </html>
