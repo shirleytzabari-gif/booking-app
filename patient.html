@@ -18,34 +18,46 @@
 ```
 .container {
   width: 100%;
-  max-width: 350px;
+  max-width: 320px;
+  text-align: center;
+}
+
+h2 {
+  margin-bottom: 20px;
   text-align: center;
 }
 
 input {
   width: 100%;
+  max-width: 280px;
   padding: 12px;
-  margin: 8px 0;
+  margin: 8px auto;
   border-radius: 10px;
   border: 1px solid #ccc;
+  display: block;
+  text-align: right;
 }
 
 button {
   width: 100%;
+  max-width: 280px;
   padding: 12px;
-  margin-top: 10px;
+  margin-top: 12px;
   border: none;
   border-radius: 12px;
   background: #3b82f6;
   color: white;
   font-size: 16px;
+  cursor: pointer;
 }
 
 .link {
-  margin-top: 10px;
+  margin-top: 12px;
   display: block;
   color: #3b82f6;
   cursor: pointer;
+  font-size: 14px;
+  text-align: center;
 }
 ```
 
@@ -57,16 +69,32 @@ button {
 
   <h2>קביעת פגישה</h2>
 
-  <input type="text" placeholder="שם מלא">
-  <input type="date">
-  <input type="email" placeholder="אימייל">
-  <input type="password" placeholder="סיסמה">
+  <input id="name" type="text" placeholder="שם מלא">
+  <input id="birth" type="date">
+  <input id="email" type="email" placeholder="אימייל">
+  <input id="password" type="password" placeholder="סיסמה">
 
-<button>הרשמה</button>
+<button onclick="register()">הרשמה</button>
 
 <span class="link">כבר רשום? התחברות</span>
 
 </div>
+
+<script>
+  function register() {
+    const name = document.getElementById("name").value;
+    const birth = document.getElementById("birth").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    if (!name || !birth || !email || !password) {
+      alert("יש למלא את כל השדות");
+      return;
+    }
+
+    alert("ההרשמה בוצעה בהצלחה");
+  }
+</script>
 
 </body>
 </html>
