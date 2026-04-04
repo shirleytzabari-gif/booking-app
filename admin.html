@@ -91,7 +91,6 @@ button {
   cursor: pointer;
 }
 
-/* לוח שנה */
 .calendar {
   display: flex;
   gap: 8px;
@@ -134,8 +133,6 @@ button {
   <div class="icon" onclick="show('hours')" id="iconHours">🕒</div>
 </div>
 
-<!-- סוגים -->
-
 <div id="types" class="section active">
 
   <input id="name" placeholder="שם פגישה">
@@ -146,8 +143,6 @@ button {
   <div class="list" id="list"></div>
 
 </div>
-
-<!-- שעות -->
 
 <div id="hours" class="section">
 
@@ -184,8 +179,6 @@ function show(section) {
     document.getElementById("iconHours").classList.add("active");
   }
 }
-
-/* סוגי פגישות */
 
 function add() {
   const name = document.getElementById("name").value;
@@ -227,8 +220,6 @@ function showList() {
   });
 }
 
-/* שעות */
-
 function save() {
   const date = document.getElementById("date").value;
   const start = document.getElementById("start").value;
@@ -262,21 +253,18 @@ function showHours() {
   });
 }
 
-/* לוח שנה עם חגים */
-
 async function renderCalendar() {
   const calendar = document.getElementById("calendar");
   calendar.innerHTML = "";
 
   const today = new Date();
-  const start = today.toISOString().split("T")[0];
 
-  const res = await fetch("https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&year=" + today.getFullYear());
+  const res = await fetch("https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&i=on&lg=he&year=" + today.getFullYear());
   const data = await res.json();
 
   const holidays = {};
   data.items.forEach(h=>{
-    holidays[h.date] = h.title;
+    holidays[h.date] = h.hebrew || h.title;
   });
 
   for (let i = 0; i < 7; i++) {
