@@ -21,7 +21,6 @@ body {
   text-align: center;
 }
 
-/* אייקונים */
 .menu {
   display: flex;
   justify-content: center;
@@ -45,7 +44,6 @@ body {
   color: white;
 }
 
-/* מסכים */
 .section {
   display: none;
   margin-top: 30px;
@@ -55,7 +53,6 @@ body {
   display: block;
 }
 
-/* שדות */
 input {
   width: 100%;
   padding: 12px;
@@ -64,7 +61,6 @@ input {
   border: 1px solid #ddd;
 }
 
-/* כפתור */
 button {
   width: 100%;
   padding: 12px;
@@ -76,7 +72,6 @@ button {
   cursor: pointer;
 }
 
-/* רשימה */
 .list {
   margin-top: 15px;
   text-align: right;
@@ -106,21 +101,10 @@ button {
 
 <div class="menu">
 
-  <!-- סוגי פגישות -->
-
-  <div class="icon active" onclick="show('types')" id="iconTypes">
-    💡
-  </div>
-
-  <!-- שעות -->
-
-  <div class="icon" onclick="show('hours')" id="iconHours">
-    🕒
-  </div>
+  <div class="icon active" onclick="show('types')" id="iconTypes">💡</div>
+  <div class="icon" onclick="show('hours')" id="iconHours">🕒</div>
 
 </div>
-
-<!-- סוגי פגישות -->
 
 <div id="types" class="section active">
 
@@ -133,12 +117,9 @@ button {
 
 </div>
 
-<!-- שעות -->
-
 <div id="hours" class="section">
 
   <input type="date" id="date">
-
   <input type="time" id="start">
   <input type="time" id="end">
 
@@ -147,7 +128,6 @@ button {
   <div class="list" id="hoursList"></div>
 
 </div>
-
 
 </div>
 
@@ -211,41 +191,45 @@ function showList() {
   });
 }
 
+/* שעות */
+
+function save() {
+  const date = document.getElementById("date").value;
+  const start = document.getElementById("start").value;
+  const end = document.getElementById("end").value;
+
+  if (!date || !start || !end) {
+    alert("מלאי הכל");
+    return;
+  }
+
+  const data = JSON.parse(localStorage.getItem("hours")) || [];
+
+  data.push({date, start, end});
+  localStorage.setItem("hours", JSON.stringify(data));
+
+  showHours();
+}
+
+function showHours() {
+  const data = JSON.parse(localStorage.getItem("hours")) || [];
+  const list = document.getElementById("hoursList");
+
+  list.innerHTML = "";
+
+  data.forEach(h=>{
+    list.innerHTML += `
+      <div class="item">
+        <div>${h.date} | ${h.start} - ${h.end}</div>
+      </div>
+    `;
+  });
+}
+
 showList();
+showHours();
 
 </script>
 
 </body>
 </html>
-
-function save() {
-const date = document.getElementById("date").value;
-const start = document.getElementById("start").value;
-const end = document.getElementById("end").value;
-
-if (!date || !start || !end) {
-alert("מלאי הכל");
-return;
-}
-
-const data = JSON.parse(localStorage.getItem("hours")) || [];
-
-data.push({date, start, end});
-
-localStorage.setItem("hours", JSON.stringify(data));
-
-showHours();
-}
-
-function showHours() {
-const data = JSON.parse(localStorage.getItem("hours")) || [];
-const list = document.getElementById("hoursList");
-
-list.innerHTML = "";
-
-data.forEach(h=>{
-list.innerHTML += `<div>${h.date} | ${h.start} - ${h.end}</div>`;
-});
-}
-
-showHours();
