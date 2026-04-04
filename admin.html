@@ -8,29 +8,25 @@
 <style>
 body {
   font-family: Arial;
-  background: #f3f4f6;
   margin: 0;
-  display: flex;
-  justify-content: center;
-  padding-top: 40px;
+  background: #f3f4f6;
 }
 
 .container {
-  width: 100%;
-  max-width: 420px;
-  text-align: center;
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
 }
 
 h2 {
-  margin-bottom: 20px;
+  text-align: center;
 }
-
-/* אייקונים */
 
 .menu {
   display: flex;
   justify-content: center;
   gap: 15px;
+  margin-bottom: 20px;
 }
 
 .icon {
@@ -50,11 +46,8 @@ h2 {
   color: white;
 }
 
-/* מסכים */
-
 .section {
   display: none;
-  margin-top: 25px;
 }
 
 .section.active {
@@ -63,84 +56,79 @@ h2 {
 
 /* יומן */
 
-.week-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 15px 0;
+.calendar {
+  display: grid;
+  grid-template-columns: 80px repeat(7, 1fr);
+  border-top: 1px solid #ddd;
 }
 
-.nav-btn {
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
+.time {
+  height: 40px;
+  font-size: 12px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
 }
 
-.week-days {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
+.cell {
+  height: 40px;
+  border-bottom: 1px solid #eee;
+  border-left: 1px solid #eee;
+  position: relative;
 }
 
-.day {
-  min-width: 60px;
-  padding: 10px;
-  border-radius: 12px;
-  background: white;
-  cursor: pointer;
-  font-size: 13px;
-  border: 1px solid #eee;
+.available {
+  background: #fbcfe8;
 }
 
-.day.selected {
-  border: 2px solid #6366f1;
+.booked {
+  background: #86efac;
+  font-size: 10px;
+  padding: 2px;
 }
 
-.day.holiday {
+.holiday {
   background: #fef3c7;
 }
 
-.day.past {
-  opacity: 0.4;
-  pointer-events: none;
+.header {
+  display: grid;
+  grid-template-columns: 80px repeat(7, 1fr);
+  margin-bottom: 5px;
 }
 
-/* שדות */
+.day {
+  text-align: center;
+  font-weight: bold;
+}
 
-input {
+/* טפסים */
+
+input, select {
   width: 100%;
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 12px;
+  padding: 10px;
+  margin: 6px 0;
+  border-radius: 10px;
   border: 1px solid #ddd;
 }
 
 button {
-  width: 100%;
-  padding: 12px;
+  padding: 10px;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   background: #6366f1;
   color: white;
-  margin-top: 10px;
   cursor: pointer;
+  margin-top: 10px;
 }
 
-/* רשימה */
-
-.saved {
-  margin-top: 15px;
-  text-align: right;
-}
-
-.saved-item {
+.item {
   background: white;
   padding: 10px;
-  border-radius: 10px;
   margin-top: 6px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
 }
-
 </style>
 
 </head>
@@ -151,25 +139,43 @@ button {
 <h2>ניהול</h2>
 
 <div class="menu">
-  <div class="icon active" onclick="show('hours')" id="iconHours">🕒</div>
+  <div class="icon active" onclick="show('profile')" id="i1">👤</div>
+  <div class="icon" onclick="show('types')" id="i2">💡</div>
+  <div class="icon" onclick="show('calendar')" id="i3">🕒</div>
 </div>
 
-<div id="hours" class="section active">
+<!-- פרטים -->
 
-  <div class="week-header">
-    <button class="nav-btn" onclick="changeWeek(-1)">‹</button>
-    <div id="weekTitle"></div>
-    <button class="nav-btn" onclick="changeWeek(1)">›</button>
-  </div>
+<div id="profile" class="section active">
 
-  <div class="week-days" id="weekDays"></div>
+  <input id="fullname" placeholder="שם מלא">
+  <input id="email" placeholder="אימייל">
+  <input id="phone" placeholder="טלפון">
+  <input id="business" placeholder="שם העסק">
 
-  <input type="time" id="start">
-  <input type="time" id="end">
+<button onclick="saveProfile()">שמור</button>
 
-<button onclick="save()">שמור שעות</button>
+</div>
 
-  <div class="saved" id="saved"></div>
+<!-- סוגי פגישות -->
+
+<div id="types" class="section">
+
+  <input id="tname" placeholder="שם פגישה">
+  <input id="tduration" type="number" placeholder="משך בדקות">
+
+<button onclick="addType()">הוסף</button>
+
+  <div id="typesList"></div>
+
+</div>
+
+<!-- יומן -->
+
+<div id="calendar" class="section">
+
+  <div class="header" id="header"></div>
+  <div class="calendar" id="calendarGrid"></div>
 
 </div>
 
@@ -177,115 +183,103 @@ button {
 
 <script>
 
-let currentDate = new Date();
-let selectedDate = null;
+function show(id){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 
-function show(section) {
-  document.getElementById("hours").classList.add("active");
+  document.querySelectorAll(".icon").forEach(i=>i.classList.remove("active"));
+  event.target.classList.add("active");
 }
 
-/* יומן */
+/* פרופיל */
 
-function getWeekStart(date) {
-  const d = new Date(date);
-  const day = d.getDay();
-  return new Date(d.setDate(d.getDate() - day));
+function saveProfile(){
+  const data={
+    name:fullname.value,
+    email:email.value,
+    phone:phone.value,
+    business:business.value
+  };
+  localStorage.setItem("profile",JSON.stringify(data));
+  alert("נשמר");
 }
 
-async function renderWeek() {
-  const container = document.getElementById("weekDays");
-  container.innerHTML = "";
+/* סוגי פגישות */
 
-  const today = new Date();
-  today.setHours(0,0,0,0);
-
-  const start = getWeekStart(currentDate);
-
-  document.getElementById("weekTitle").innerText =
-    start.toLocaleDateString("he-IL");
-
-  const res = await fetch("https://www.hebcal.com/hebcal?v=1&cfg=json&i=on&lg=he&year=" + currentDate.getFullYear());
-  const data = await res.json();
-
-  const holidays = {};
-  data.items.forEach(h=>{
-    holidays[h.date] = h.hebrew || h.title;
-  });
-
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-
-    const dateStr = d.toISOString().split("T")[0];
-    const dayName = d.toLocaleDateString("he-IL", { weekday: "short" });
-
-    const div = document.createElement("div");
-    div.className = "day";
-
-    if (d < today) div.classList.add("past");
-    if (dayName.includes("ש") || holidays[dateStr]) div.classList.add("holiday");
-
-    div.innerHTML = `${dayName}<br>${d.getDate()}`;
-
-    div.onclick = () => {
-      if (d < today) return;
-
-      selectedDate = dateStr;
-
-      document.querySelectorAll(".day").forEach(d=>d.classList.remove("selected"));
-      div.classList.add("selected");
-    };
-
-    container.appendChild(div);
-  }
+function addType(){
+  let data=JSON.parse(localStorage.getItem("types"))||[];
+  data.push({name:tname.value,duration:tduration.value});
+  localStorage.setItem("types",JSON.stringify(data));
+  renderTypes();
 }
 
-function changeWeek(offset) {
-  currentDate.setDate(currentDate.getDate() + offset * 7);
-  renderWeek();
-}
-
-/* שמירה */
-
-function save() {
-  if (!selectedDate) {
-    alert("בחרי יום");
-    return;
-  }
-
-  const start = document.getElementById("start").value;
-  const end = document.getElementById("end").value;
-
-  if (!start || !end) {
-    alert("מלאי שעות");
-    return;
-  }
-
-  const data = JSON.parse(localStorage.getItem("hours")) || [];
-
-  data.push({date: selectedDate, start, end});
-  localStorage.setItem("hours", JSON.stringify(data));
-
-  renderSaved();
-}
-
-function renderSaved() {
-  const data = JSON.parse(localStorage.getItem("hours")) || [];
-  const container = document.getElementById("saved");
-
-  container.innerHTML = "";
-
-  data.forEach(h=>{
-    container.innerHTML += `
-      <div class="saved-item">
-        ${h.date} | ${h.start} - ${h.end}
+function renderTypes(){
+  let data=JSON.parse(localStorage.getItem("types"))||[];
+  typesList.innerHTML="";
+  data.forEach((t,i)=>{
+    typesList.innerHTML+=`
+      <div class="item">
+        ${t.name} - ${t.duration} דק
+        <button onclick="delType(${i})">מחק</button>
       </div>
     `;
   });
 }
 
-renderWeek();
-renderSaved();
+function delType(i){
+  let data=JSON.parse(localStorage.getItem("types"));
+  data.splice(i,1);
+  localStorage.setItem("types",JSON.stringify(data));
+  renderTypes();
+}
+
+renderTypes();
+
+/* יומן */
+
+const startHour=5;
+const endHour=22;
+
+function renderCalendar(){
+
+  header.innerHTML="<div></div>";
+
+  const days=["א","ב","ג","ד","ה","ו","ש"];
+
+  for(let d=0;d<7;d++){
+    header.innerHTML+=`<div class="day">${days[d]}</div>`;
+  }
+
+  calendarGrid.innerHTML="";
+
+  for(let h=startHour;h<=endHour;h++){
+
+    calendarGrid.innerHTML+=`<div class="time">${h}:00</div>`;
+
+    for(let d=0;d<7;d++){
+
+      calendarGrid.innerHTML+=`
+        <div class="cell"
+        onclick="addBooking(this)">
+        </div>
+      `;
+    }
+  }
+}
+
+function addBooking(cell){
+
+  let name=prompt("שם מטופל");
+  if(!name)return;
+
+  let type=prompt("סוג פגישה");
+  if(!type)return;
+
+  cell.classList.add("booked");
+  cell.innerHTML=name+"<br>"+type;
+}
+
+renderCalendar();
 
 </script>
 
