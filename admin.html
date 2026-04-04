@@ -12,12 +12,12 @@ body {
   margin: 0;
   display: flex;
   justify-content: center;
-  padding-top: 60px;
+  padding-top: 40px;
 }
 
 .container {
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
   text-align: center;
 }
 
@@ -46,7 +46,7 @@ body {
 
 .section {
   display: none;
-  margin-top: 30px;
+  margin-top: 25px;
 }
 
 .section.active {
@@ -90,6 +90,36 @@ button {
   color: red;
   cursor: pointer;
 }
+
+/* לוח שנה */
+.calendar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-bottom: 15px;
+}
+
+.day {
+  min-width: 70px;
+  padding: 10px;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+}
+
+.day.holiday {
+  background: #fef3c7;
+}
+
+.day.selected {
+  border: 2px solid #3b82f6;
+}
+
+#holidayName {
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #92400e;
+}
 </style>
 
 </head>
@@ -100,11 +130,11 @@ button {
 <h2>ניהול</h2>
 
 <div class="menu">
-
   <div class="icon active" onclick="show('types')" id="iconTypes">💡</div>
   <div class="icon" onclick="show('hours')" id="iconHours">🕒</div>
-
 </div>
+
+<!-- סוגים -->
 
 <div id="types" class="section active">
 
@@ -117,7 +147,13 @@ button {
 
 </div>
 
+<!-- שעות -->
+
 <div id="hours" class="section">
+
+  <div id="holidayName"></div>
+
+  <div class="calendar" id="calendar"></div>
 
   <input type="date" id="date">
   <input type="time" id="start">
@@ -226,8 +262,55 @@ function showHours() {
   });
 }
 
+/* לוח שנה עם חגים */
+
+async function renderCalendar() {
+  const calendar = document.getElementById("calendar");
+  calendar.innerHTML = "";
+
+  const today = new Date();
+  const start = today.toISOString().split("T")[0];
+
+  const res = await fetch("https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&year=" + today.getFullYear());
+  const data = await res.json();
+
+  const holidays = {};
+  data.items.forEach(h=>{
+    holidays[h.date] = h.title;
+  });
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date();
+    d.setDate(today.getDate() + i);
+
+    const dateStr = d.toISOString().split("T")[0];
+    const dayName = d.toLocaleDateString("he-IL", { weekday: "short" });
+
+    const div = document.createElement("div");
+    div.className = "day";
+
+    if (dayName.includes("ש") || holidays[dateStr]) {
+      div.classList.add("holiday");
+    }
+
+    div.innerHTML = `${dayName}<br>${d.getDate()}/${d.getMonth()+1}`;
+
+    div.onclick = () => {
+      document.getElementById("date").value = dateStr;
+
+      document.querySelectorAll(".day").forEach(d=>d.classList.remove("selected"));
+      div.classList.add("selected");
+
+      document.getElementById("holidayName").innerText = holidays[dateStr] || "";
+    };
+
+    calendar.appendChild(div);
+  }
+}
+
 showList();
 showHours();
+renderCalendar();
 
 </script>
 
