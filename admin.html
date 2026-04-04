@@ -91,6 +91,16 @@ button {
 <button onclick="addTreatment()">הוסף טיפול</button>
 
 <div class="list" id="treatmentsList"></div>
+
+<h3>שעות עבודה</h3>
+
+<input type="date" id="availDate">
+<input type="time" id="startTime">
+<input type="time" id="endTime">
+
+<button onclick="saveAvailability()">שמור שעות</button>
+
+<div class="list" id="availabilityList"></div>
 ```
 
   </div>
@@ -105,7 +115,7 @@ function toggleAuth() {
   isRegister = !isRegister;
 
   document.getElementById("title").innerText = isRegister ? "הרשמת מנהל" : "כניסת מנהל";
-  document.querySelector("button").innerText = isRegister ? "הרשמה" : "כניסה";
+  document.querySelector("#auth button").innerText = isRegister ? "הרשמה" : "כניסה";
   document.querySelector(".link").innerText = isRegister ? "יש לך חשבון? כניסה" : "אין לך חשבון? הרשמה";
 }
 
@@ -136,6 +146,7 @@ function handleAuth() {
   document.getElementById("dashboard").classList.remove("hidden");
 
   showTreatments();
+  showAvailability();
 }
 
 function addTreatment() {
@@ -149,10 +160,7 @@ function addTreatment() {
 
   const treatments = JSON.parse(localStorage.getItem("treatments")) || [];
 
-  treatments.push({
-    name: name,
-    duration: duration
-  });
+  treatments.push({ name, duration });
 
   localStorage.setItem("treatments", JSON.stringify(treatments));
 
@@ -170,6 +178,36 @@ function showTreatments() {
 
   treatments.forEach(t => {
     list.innerHTML += `<div>${t.name} - ${t.duration} דקות</div>`;
+  });
+}
+
+function saveAvailability() {
+  const date = document.getElementById("availDate").value;
+  const start = document.getElementById("startTime").value;
+  const end = document.getElementById("endTime").value;
+
+  if (!date || !start || !end) {
+    alert("יש למלא את כל השדות");
+    return;
+  }
+
+  const availability = JSON.parse(localStorage.getItem("availability")) || [];
+
+  availability.push({ date, start, end });
+
+  localStorage.setItem("availability", JSON.stringify(availability));
+
+  showAvailability();
+}
+
+function showAvailability() {
+  const availability = JSON.parse(localStorage.getItem("availability")) || [];
+  const list = document.getElementById("availabilityList");
+
+  list.innerHTML = "";
+
+  availability.forEach(a => {
+    list.innerHTML += `<div>${a.date} | ${a.start} - ${a.end}</div>`;
   });
 }
 
