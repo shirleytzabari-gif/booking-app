@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>ניהול תורים</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f5f7fb;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+```
+.container {
+  width: 100%;
+  max-width: 320px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: #3b82f6;
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.list {
+  margin-top: 20px;
+  text-align: right;
+  font-size: 14px;
+}
+```
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <h2>ניהול זמינות</h2>
+
+  <input type="date" id="date">
+  <input type="text" id="times" placeholder="שעות מופרדות בפסיק לדוגמה 09:00,10:00">
+
+<button onclick="save()">שמור זמינות</button>
+
+  <div class="list" id="list"></div>
+
+</div>
+
+<script>
+
+function save() {
+  const date = document.getElementById("date").value;
+  const times = document.getElementById("times").value.split(",");
+
+  if (!date || times.length === 0) {
+    alert("יש למלא תאריך ושעות");
+    return;
+  }
+
+  const data = JSON.parse(localStorage.getItem("availability")) || {};
+
+  data[date] = times;
+
+  localStorage.setItem("availability", JSON.stringify(data));
+
+  alert("נשמר בהצלחה");
+
+  show();
+}
+
+function show() {
+  const data = JSON.parse(localStorage.getItem("availability")) || {};
+  const list = document.getElementById("list");
+
+  list.innerHTML = "";
+
+  for (let date in data) {
+    list.innerHTML += `<div>${date} : ${data[date].join(", ")}</div>`;
+  }
+}
+
+show();
+
+</script>
+
+</body>
+</html>
