@@ -3,7 +3,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>ניהול מטפל</title>
+<title>ניהול</title>
 
 <style>
 body {
@@ -17,30 +17,49 @@ body {
 
 .container {
   width: 100%;
-  max-width: 360px;
+  max-width: 400px;
   text-align: center;
 }
 
+/* תפריט אייקונים */
 .menu {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 15px;
+  margin-bottom: 25px;
 }
 
-.menu button {
-  padding: 10px 14px;
-  border-radius: 10px;
+.icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
   background: #e5e7eb;
-  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  position: relative;
+  font-size: 20px;
 }
 
-.menu button.active {
+.icon.active {
   background: #3b82f6;
   color: white;
 }
 
+/* טקסט שמופיע בהובר */
+.icon span {
+  position: absolute;
+  bottom: -25px;
+  font-size: 12px;
+  display: none;
+}
+
+.icon:hover span {
+  display: block;
+}
+
+/* אזורים */
 .section {
   display: none;
 }
@@ -49,15 +68,17 @@ body {
   display: block;
 }
 
+/* שדות */
 input {
   width: 100%;
   padding: 12px;
   margin: 8px 0;
-  border-radius: 10px;
-  border: 1px solid #ccc;
+  border-radius: 12px;
+  border: 1px solid #ddd;
 }
 
-button.main {
+/* כפתור */
+button {
   width: 100%;
   padding: 12px;
   border: none;
@@ -68,16 +89,24 @@ button.main {
   cursor: pointer;
 }
 
+/* רשימה */
 .list {
   text-align: right;
   margin-top: 15px;
-  font-size: 14px;
+}
+
+.item {
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
 }
 
 .delete {
   color: red;
   cursor: pointer;
-  margin-right: 10px;
 }
 </style>
 
@@ -89,24 +118,35 @@ button.main {
 <h2>ניהול</h2>
 
 <div class="menu">
-  <button id="btnTreatments" class="active" onclick="showSection('treatments')">טיפולים</button>
-  <button id="btnHours" onclick="showSection('hours')">שעות עבודה</button>
+  <div class="icon active" onclick="show('treatments')" id="icon1">
+    🩺
+    <span>טיפולים</span>
+  </div>
+
+  <div class="icon" onclick="show('hours')" id="icon2">
+    📅
+    <span>שעות</span>
+  </div>
 </div>
+
+<!-- טיפולים -->
 
 <div id="treatments" class="section active">
 
-  <input id="treatmentName" placeholder="שם טיפול">
+  <input id="name" placeholder="שם טיפול">
   <input id="duration" type="number" placeholder="משך בדקות">
 
-<button class="main" onclick="addTreatment()">הוסף טיפול</button>
+<button onclick="add()">הוסף טיפול</button>
 
-  <div class="list" id="treatmentsList"></div>
+  <div class="list" id="list"></div>
 
 </div>
 
+<!-- שעות -->
+
 <div id="hours" class="section">
 
-  <p>שלב הבא נבנה כאן את היומן</p>
+  <p>כאן נבנה יומן יפה בשלב הבא</p>
 
 </div>
 
@@ -114,28 +154,28 @@ button.main {
 
 <script>
 
-function showSection(section) {
+function show(section) {
   document.getElementById("treatments").classList.remove("active");
   document.getElementById("hours").classList.remove("active");
 
-  document.getElementById("btnTreatments").classList.remove("active");
-  document.getElementById("btnHours").classList.remove("active");
-
   document.getElementById(section).classList.add("active");
 
+  document.getElementById("icon1").classList.remove("active");
+  document.getElementById("icon2").classList.remove("active");
+
   if (section === "treatments") {
-    document.getElementById("btnTreatments").classList.add("active");
+    document.getElementById("icon1").classList.add("active");
   } else {
-    document.getElementById("btnHours").classList.add("active");
+    document.getElementById("icon2").classList.add("active");
   }
 }
 
-function addTreatment() {
-  const name = document.getElementById("treatmentName").value;
+function add() {
+  const name = document.getElementById("name").value;
   const duration = document.getElementById("duration").value;
 
   if (!name || !duration) {
-    alert("מלאי את כל השדות");
+    alert("מלאי הכל");
     return;
   }
 
@@ -144,38 +184,33 @@ function addTreatment() {
   data.push({name, duration});
   localStorage.setItem("treatments", JSON.stringify(data));
 
-  document.getElementById("treatmentName").value = "";
-  document.getElementById("duration").value = "";
-
-  showTreatments();
+  showList();
 }
 
-function deleteTreatment(index) {
+function del(i) {
   const data = JSON.parse(localStorage.getItem("treatments")) || [];
-
-  data.splice(index, 1);
+  data.splice(i,1);
   localStorage.setItem("treatments", JSON.stringify(data));
-
-  showTreatments();
+  showList();
 }
 
-function showTreatments() {
+function showList() {
   const data = JSON.parse(localStorage.getItem("treatments")) || [];
-  const list = document.getElementById("treatmentsList");
+  const list = document.getElementById("list");
 
   list.innerHTML = "";
 
-  data.forEach((t, i)=>{
+  data.forEach((t,i)=>{
     list.innerHTML += `
-      <div>
-        ${t.name} - ${t.duration} דקות
-        <span class="delete" onclick="deleteTreatment(${i})">מחק</span>
+      <div class="item">
+        <div>${t.name} - ${t.duration} דק</div>
+        <div class="delete" onclick="del(${i})">✖</div>
       </div>
     `;
   });
 }
 
-showTreatments();
+showList();
 
 </script>
 
