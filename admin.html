@@ -2,24 +2,48 @@
 
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>ניהול מטפל</title>
-  <style>
-    body {
-      font-family: Arial;
-      background: #f5f7fb;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      text-align: center;
-    }
+<meta charset="UTF-8">
+<title>ניהול</title>
 
-```
+<style>
+body {
+  font-family: Arial;
+  background: #f5f7fb;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+}
+
 .container {
   width: 100%;
-  max-width: 320px;
+  max-width: 360px;
+  text-align: center;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  background: #e5e7eb;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: #3b82f6;
+  color: white;
+}
+
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
 }
 
 input {
@@ -33,23 +57,12 @@ input {
 button {
   width: 100%;
   padding: 12px;
-  margin-top: 10px;
   border: none;
   border-radius: 12px;
   background: #3b82f6;
   color: white;
-  cursor: pointer;
-}
-
-.link {
   margin-top: 10px;
-  color: #3b82f6;
   cursor: pointer;
-  display: block;
-}
-
-.hidden {
-  display: none;
 }
 
 .list {
@@ -57,112 +70,84 @@ button {
   margin-top: 15px;
   font-size: 14px;
 }
-```
 
-  </style>
+.slot {
+  padding: 10px;
+  margin: 6px 0;
+  border-radius: 10px;
+  background: #e5e7eb;
+  cursor: pointer;
+}
+
+.slot.selected {
+  background: #3b82f6;
+  color: white;
+}
+</style>
+
 </head>
 <body>
 
 <div class="container">
 
-  <h2 id="title">כניסת מנהל</h2>
+<h2>ניהול</h2>
 
-  <div id="auth">
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(0)">טיפולים</div>
+  <div class="tab" onclick="switchTab(1)">שעות עבודה</div>
+</div>
 
-```
-<input id="email" type="email" placeholder="אימייל">
-<input id="password" type="password" placeholder="סיסמה">
+<div id="treatmentsSection" class="section active">
 
-<button onclick="handleAuth()">כניסה</button>
-
-<span class="link" onclick="toggleAuth()">אין לך חשבון? הרשמה</span>
-```
-
-  </div>
-
-  <div id="dashboard" class="hidden">
-
-```
-<h3>סוגי טיפולים</h3>
-
-<input id="treatmentName" type="text" placeholder="שם טיפול">
-<input id="duration" type="number" placeholder="משך בדקות">
+  <input id="treatmentName" placeholder="שם טיפול">
+  <input id="duration" type="number" placeholder="משך בדקות">
 
 <button onclick="addTreatment()">הוסף טיפול</button>
 
-<div class="list" id="treatmentsList"></div>
+  <div class="list" id="treatmentsList"></div>
 
-<h3>שעות עבודה</h3>
+</div>
 
-<input type="date" id="availDate">
-<input type="time" id="startTime">
-<input type="time" id="endTime">
+<div id="availabilitySection" class="section">
 
-<button onclick="saveAvailability()">שמור שעות</button>
+  <input type="date" id="date">
 
-<div class="list" id="availabilityList"></div>
-```
+  <div id="hours"></div>
 
-  </div>
+<button onclick="saveDay()">שמור יום</button>
+
+  <div class="list" id="availabilityList"></div>
+
+</div>
 
 </div>
 
 <script>
 
-let isRegister = false;
+function switchTab(index) {
+  document.querySelectorAll(".tab").forEach((t,i)=>{
+    t.classList.toggle("active", i===index);
+  });
 
-function toggleAuth() {
-  isRegister = !isRegister;
-
-  document.getElementById("title").innerText = isRegister ? "הרשמת מנהל" : "כניסת מנהל";
-  document.querySelector("#auth button").innerText = isRegister ? "הרשמה" : "כניסה";
-  document.querySelector(".link").innerText = isRegister ? "יש לך חשבון? כניסה" : "אין לך חשבון? הרשמה";
+  document.getElementById("treatmentsSection").classList.toggle("active", index===0);
+  document.getElementById("availabilitySection").classList.toggle("active", index===1);
 }
 
-function handleAuth() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  if (!email || !password) {
-    alert("יש למלא את כל השדות");
-    return;
-  }
-
-  let admin = JSON.parse(localStorage.getItem("admin"));
-
-  if (isRegister) {
-    admin = { email, password };
-    localStorage.setItem("admin", JSON.stringify(admin));
-    alert("נרשמת בהצלחה");
-  } else {
-    if (!admin || email !== admin.email || password !== admin.password) {
-      alert("פרטים שגויים");
-      return;
-    }
-    alert("התחברת בהצלחה");
-  }
-
-  document.getElementById("auth").classList.add("hidden");
-  document.getElementById("dashboard").classList.remove("hidden");
-
-  showTreatments();
-  showAvailability();
-}
+/* טיפולים */
 
 function addTreatment() {
   const name = document.getElementById("treatmentName").value;
   const duration = document.getElementById("duration").value;
 
   if (!name || !duration) {
-    alert("יש למלא את כל השדות");
+    alert("מלאי את כל השדות");
     return;
   }
 
-  const treatments = JSON.parse(localStorage.getItem("treatments")) || [];
+  const data = JSON.parse(localStorage.getItem("treatments")) || [];
 
-  treatments.push({ name, duration });
-
-  localStorage.setItem("treatments", JSON.stringify(treatments));
+  data.push({name, duration});
+  localStorage.setItem("treatments", JSON.stringify(data));
 
   document.getElementById("treatmentName").value = "";
   document.getElementById("duration").value = "";
@@ -171,45 +156,80 @@ function addTreatment() {
 }
 
 function showTreatments() {
-  const treatments = JSON.parse(localStorage.getItem("treatments")) || [];
+  const data = JSON.parse(localStorage.getItem("treatments")) || [];
   const list = document.getElementById("treatmentsList");
 
   list.innerHTML = "";
 
-  treatments.forEach(t => {
+  data.forEach(t=>{
     list.innerHTML += `<div>${t.name} - ${t.duration} דקות</div>`;
   });
 }
 
-function saveAvailability() {
-  const date = document.getElementById("availDate").value;
-  const start = document.getElementById("startTime").value;
-  const end = document.getElementById("endTime").value;
+/* שעות */
 
-  if (!date || !start || !end) {
-    alert("יש למלא את כל השדות");
+let selectedSlots = [];
+
+function createHours() {
+  const container = document.getElementById("hours");
+  container.innerHTML = "";
+
+  for (let h=8; h<=20; h++) {
+    const time = (h<10 ? "0"+h : h) + ":00";
+
+    const div = document.createElement("div");
+    div.className = "slot";
+    div.innerText = time;
+
+    div.onclick = ()=>{
+      div.classList.toggle("selected");
+
+      if (selectedSlots.includes(time)) {
+        selectedSlots = selectedSlots.filter(t=>t!==time);
+      } else {
+        selectedSlots.push(time);
+      }
+    };
+
+    container.appendChild(div);
+  }
+}
+
+function saveDay() {
+  const date = document.getElementById("date").value;
+
+  if (!date || selectedSlots.length===0) {
+    alert("בחרי תאריך ושעות");
     return;
   }
 
-  const availability = JSON.parse(localStorage.getItem("availability")) || [];
+  const data = JSON.parse(localStorage.getItem("availability")) || {};
 
-  availability.push({ date, start, end });
+  data[date] = selectedSlots;
 
-  localStorage.setItem("availability", JSON.stringify(availability));
+  localStorage.setItem("availability", JSON.stringify(data));
+
+  selectedSlots = [];
+
+  document.querySelectorAll(".slot").forEach(s=>s.classList.remove("selected"));
 
   showAvailability();
 }
 
 function showAvailability() {
-  const availability = JSON.parse(localStorage.getItem("availability")) || [];
+  const data = JSON.parse(localStorage.getItem("availability")) || {};
   const list = document.getElementById("availabilityList");
 
   list.innerHTML = "";
 
-  availability.forEach(a => {
-    list.innerHTML += `<div>${a.date} | ${a.start} - ${a.end}</div>`;
-  });
+  for (let d in data) {
+    list.innerHTML += `<div>${d} : ${data[d].join(", ")}</div>`;
+  }
 }
+
+createHours();
+showTreatments();
+showAvailability();
 
 </script>
 
