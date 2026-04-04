@@ -17,8 +17,47 @@
     }
 
 ```
-h1 {
-  font-size: 24px;
+.container {
+  width: 100%;
+  max-width: 320px;
+}
+
+h2 {
+  margin-bottom: 20px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+.times button {
+  width: 100%;
+  margin: 6px 0;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #e5e7eb;
+  cursor: pointer;
+}
+
+.times button.selected {
+  background: #3b82f6;
+  color: white;
+}
+
+.confirm {
+  margin-top: 15px;
+  background: #3b82f6;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  width: 100%;
+  cursor: pointer;
 }
 ```
 
@@ -26,7 +65,62 @@ h1 {
 </head>
 <body>
 
-<h1>ברוכה הבאה למערכת קביעת התורים 🎉</h1>
+<div class="container">
+
+  <h2>קביעת תור</h2>
+
+  <input type="date" id="date">
+
+  <div class="times" id="times"></div>
+
+<button class="confirm" onclick="book()">אישור תור</button>
+
+</div>
+
+<script>
+
+const allTimes = ["09:00", "10:00", "11:00", "12:00", "16:00", "17:00"];
+
+let selectedTime = null;
+
+document.getElementById("date").addEventListener("change", function() {
+  const container = document.getElementById("times");
+  container.innerHTML = "";
+
+  allTimes.forEach(time => {
+    const btn = document.createElement("button");
+    btn.innerText = time;
+
+    btn.onclick = () => {
+      selectedTime = time;
+
+      document.querySelectorAll(".times button").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+    };
+
+    container.appendChild(btn);
+  });
+});
+
+function book() {
+  const date = document.getElementById("date").value;
+
+  if (!date || !selectedTime) {
+    alert("יש לבחור תאריך ושעה");
+    return;
+  }
+
+  const appointment = {
+    date: date,
+    time: selectedTime
+  };
+
+  localStorage.setItem("appointment", JSON.stringify(appointment));
+
+  alert("התור נקבע בהצלחה");
+}
+
+</script>
 
 </body>
 </html>
