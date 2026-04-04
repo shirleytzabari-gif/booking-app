@@ -66,41 +66,83 @@ button {
 
 <div class="container">
 
-  <h2>קביעת פגישה</h2>
+  <h2 id="title">קביעת פגישה</h2>
 
   <input id="name" type="text" placeholder="שם מלא">
   <input id="birth" type="date">
   <input id="email" type="email" placeholder="אימייל">
   <input id="password" type="password" placeholder="סיסמה">
 
-<button onclick="register()">הרשמה</button>
+<button onclick="handleSubmit()">הרשמה</button>
 
-<span class="link">כבר רשום? התחברות</span>
+<span class="link" onclick="toggleMode()">כבר רשום? התחברות</span>
 
 </div>
 
 <script>
-  function register() {
+  let isLogin = false;
+
+  function toggleMode() {
+    isLogin = !isLogin;
+
+    const title = document.getElementById("title");
+    const name = document.getElementById("name");
+    const birth = document.getElementById("birth");
+    const button = document.querySelector("button");
+    const link = document.querySelector(".link");
+
+    if (isLogin) {
+      title.innerText = "התחברות";
+      name.style.display = "none";
+      birth.style.display = "none";
+      button.innerText = "כניסה";
+      link.innerText = "אין לך חשבון? הרשמה";
+    } else {
+      title.innerText = "קביעת פגישה";
+      name.style.display = "block";
+      birth.style.display = "block";
+      button.innerText = "הרשמה";
+      link.innerText = "כבר רשום? התחברות";
+    }
+  }
+
+  function handleSubmit() {
     const name = document.getElementById("name").value;
     const birth = document.getElementById("birth").value;
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-    if (!name || !birth || !email || !password) {
-      alert("יש למלא את כל השדות");
-      return;
+    const savedUser = JSON.parse(localStorage.getItem("user"));
+
+    if (isLogin) {
+      if (!savedUser) {
+        alert("אין משתמש רשום");
+        return;
+      }
+
+      if (email === savedUser.email && password === savedUser.password) {
+        alert("התחברת בהצלחה");
+      } else {
+        alert("אימייל או סיסמה שגויים");
+      }
+
+    } else {
+      if (!name || !birth || !email || !password) {
+        alert("יש למלא את כל השדות");
+        return;
+      }
+
+      const user = {
+        name: name,
+        birth: birth,
+        email: email,
+        password: password
+      };
+
+      localStorage.setItem("user", JSON.stringify(user));
+
+      alert("ההרשמה נשמרה בהצלחה");
     }
-
-    const user = {
-      name: name,
-      birth: birth,
-      email: email,
-      password: password
-    };
-
-    localStorage.setItem("user", JSON.stringify(user));
-
-    alert("ההרשמה נשמרה בהצלחה");
   }
 </script>
 
