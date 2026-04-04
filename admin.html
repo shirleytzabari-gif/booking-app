@@ -3,7 +3,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>ניהול</title>
+<title>ניהול מטפל</title>
 
 <style>
 body {
@@ -21,19 +21,22 @@ body {
   text-align: center;
 }
 
-.tabs {
+.menu {
   display: flex;
+  justify-content: center;
+  gap: 10px;
   margin-bottom: 20px;
 }
 
-.tab {
-  flex: 1;
-  padding: 10px;
+.menu button {
+  padding: 10px 14px;
+  border-radius: 10px;
   background: #e5e7eb;
+  border: none;
   cursor: pointer;
 }
 
-.tab.active {
+.menu button.active {
   background: #3b82f6;
   color: white;
 }
@@ -54,7 +57,7 @@ input {
   border: 1px solid #ccc;
 }
 
-button {
+button.main {
   width: 100%;
   padding: 12px;
   border: none;
@@ -71,17 +74,10 @@ button {
   font-size: 14px;
 }
 
-.slot {
-  padding: 10px;
-  margin: 6px 0;
-  border-radius: 10px;
-  background: #e5e7eb;
+.delete {
+  color: red;
   cursor: pointer;
-}
-
-.slot.selected {
-  background: #3b82f6;
-  color: white;
+  margin-right: 10px;
 }
 </style>
 
@@ -92,31 +88,25 @@ button {
 
 <h2>ניהול</h2>
 
-<div class="tabs">
-  <div class="tab active" onclick="switchTab(0)">טיפולים</div>
-  <div class="tab" onclick="switchTab(1)">שעות עבודה</div>
+<div class="menu">
+  <button id="btnTreatments" class="active" onclick="showSection('treatments')">טיפולים</button>
+  <button id="btnHours" onclick="showSection('hours')">שעות עבודה</button>
 </div>
 
-<div id="treatmentsSection" class="section active">
+<div id="treatments" class="section active">
 
   <input id="treatmentName" placeholder="שם טיפול">
   <input id="duration" type="number" placeholder="משך בדקות">
 
-<button onclick="addTreatment()">הוסף טיפול</button>
+<button class="main" onclick="addTreatment()">הוסף טיפול</button>
 
   <div class="list" id="treatmentsList"></div>
 
 </div>
 
-<div id="availabilitySection" class="section">
+<div id="hours" class="section">
 
-  <input type="date" id="date">
-
-  <div id="hours"></div>
-
-<button onclick="saveDay()">שמור יום</button>
-
-  <div class="list" id="availabilityList"></div>
+  <p>שלב הבא נבנה כאן את היומן</p>
 
 </div>
 
@@ -124,16 +114,21 @@ button {
 
 <script>
 
-function switchTab(index) {
-  document.querySelectorAll(".tab").forEach((t,i)=>{
-    t.classList.toggle("active", i===index);
-  });
+function showSection(section) {
+  document.getElementById("treatments").classList.remove("active");
+  document.getElementById("hours").classList.remove("active");
 
-  document.getElementById("treatmentsSection").classList.toggle("active", index===0);
-  document.getElementById("availabilitySection").classList.toggle("active", index===1);
+  document.getElementById("btnTreatments").classList.remove("active");
+  document.getElementById("btnHours").classList.remove("active");
+
+  document.getElementById(section).classList.add("active");
+
+  if (section === "treatments") {
+    document.getElementById("btnTreatments").classList.add("active");
+  } else {
+    document.getElementById("btnHours").classList.add("active");
+  }
 }
-
-/* טיפולים */
 
 function addTreatment() {
   const name = document.getElementById("treatmentName").value;
@@ -155,81 +150,32 @@ function addTreatment() {
   showTreatments();
 }
 
+function deleteTreatment(index) {
+  const data = JSON.parse(localStorage.getItem("treatments")) || [];
+
+  data.splice(index, 1);
+  localStorage.setItem("treatments", JSON.stringify(data));
+
+  showTreatments();
+}
+
 function showTreatments() {
   const data = JSON.parse(localStorage.getItem("treatments")) || [];
   const list = document.getElementById("treatmentsList");
 
   list.innerHTML = "";
 
-  data.forEach(t=>{
-    list.innerHTML += `<div>${t.name} - ${t.duration} דקות</div>`;
+  data.forEach((t, i)=>{
+    list.innerHTML += `
+      <div>
+        ${t.name} - ${t.duration} דקות
+        <span class="delete" onclick="deleteTreatment(${i})">מחק</span>
+      </div>
+    `;
   });
 }
 
-/* שעות */
-
-let selectedSlots = [];
-
-function createHours() {
-  const container = document.getElementById("hours");
-  container.innerHTML = "";
-
-  for (let h=8; h<=20; h++) {
-    const time = (h<10 ? "0"+h : h) + ":00";
-
-    const div = document.createElement("div");
-    div.className = "slot";
-    div.innerText = time;
-
-    div.onclick = ()=>{
-      div.classList.toggle("selected");
-
-      if (selectedSlots.includes(time)) {
-        selectedSlots = selectedSlots.filter(t=>t!==time);
-      } else {
-        selectedSlots.push(time);
-      }
-    };
-
-    container.appendChild(div);
-  }
-}
-
-function saveDay() {
-  const date = document.getElementById("date").value;
-
-  if (!date || selectedSlots.length===0) {
-    alert("בחרי תאריך ושעות");
-    return;
-  }
-
-  const data = JSON.parse(localStorage.getItem("availability")) || {};
-
-  data[date] = selectedSlots;
-
-  localStorage.setItem("availability", JSON.stringify(data));
-
-  selectedSlots = [];
-
-  document.querySelectorAll(".slot").forEach(s=>s.classList.remove("selected"));
-
-  showAvailability();
-}
-
-function showAvailability() {
-  const data = JSON.parse(localStorage.getItem("availability")) || {};
-  const list = document.getElementById("availabilityList");
-
-  list.innerHTML = "";
-
-  for (let d in data) {
-    list.innerHTML += `<div>${d} : ${data[d].join(", ")}</div>`;
-  }
-}
-
-createHours();
 showTreatments();
-showAvailability();
 
 </script>
 
