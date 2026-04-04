@@ -8,28 +8,32 @@
     body {
       font-family: Arial;
       background: #f5f7fb;
-      text-align: center;
       margin: 0;
-      padding: 40px;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
 ```
 .container {
-  max-width: 400px;
-  margin: auto;
+  width: 100%;
+  max-width: 350px;
   background: white;
   padding: 30px;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  text-align: center;
 }
 
 .logo {
-  width: 120px;
+  width: 100px;
   margin-bottom: 20px;
 }
 
 h1 {
-  margin-bottom: 5px;
+  margin: 10px 0 5px;
 }
 
 p {
@@ -39,12 +43,14 @@ p {
 
 button {
   width: 100%;
+  max-width: 300px;
   padding: 15px;
-  margin: 10px 0;
+  margin: 10px auto;
   border: none;
   border-radius: 12px;
   font-size: 16px;
   cursor: pointer;
+  display: block;
 }
 
 .primary {
@@ -63,7 +69,7 @@ button {
 
 <div class="container">
 
-  <img src="LOGOCITA.PNG" class="logo">
+  <img src="./LOGOCITA.PNG" class="logo">
 
   <h1>CITA</h1>
   <p>מערכת לקביעת פגישות</p>
