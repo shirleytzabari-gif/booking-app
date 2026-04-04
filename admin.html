@@ -12,7 +12,7 @@ body {
   margin: 0;
   display: flex;
   justify-content: center;
-  padding-top: 40px;
+  padding-top: 60px;
 }
 
 .container {
@@ -21,25 +21,23 @@ body {
   text-align: center;
 }
 
-/* תפריט אייקונים */
+/* אייקונים */
 .menu {
   display: flex;
   justify-content: center;
-  gap: 15px;
-  margin-bottom: 25px;
+  gap: 20px;
 }
 
 .icon {
-  width: 50px;
-  height: 50px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   background: #e5e7eb;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  position: relative;
-  font-size: 20px;
+  font-size: 30px;
 }
 
 .icon.active {
@@ -47,21 +45,10 @@ body {
   color: white;
 }
 
-/* טקסט שמופיע בהובר */
-.icon span {
-  position: absolute;
-  bottom: -25px;
-  font-size: 12px;
-  display: none;
-}
-
-.icon:hover span {
-  display: block;
-}
-
-/* אזורים */
+/* מסכים */
 .section {
   display: none;
+  margin-top: 30px;
 }
 
 .section.active {
@@ -91,8 +78,8 @@ button {
 
 /* רשימה */
 .list {
-  text-align: right;
   margin-top: 15px;
+  text-align: right;
 }
 
 .item {
@@ -118,25 +105,29 @@ button {
 <h2>ניהול</h2>
 
 <div class="menu">
-  <div class="icon active" onclick="show('treatments')" id="icon1">
-    🩺
-    <span>טיפולים</span>
+
+  <!-- סוגי פגישות -->
+
+  <div class="icon active" onclick="show('types')" id="iconTypes">
+    💡
   </div>
 
-  <div class="icon" onclick="show('hours')" id="icon2">
-    📅
-    <span>שעות</span>
+  <!-- שעות -->
+
+  <div class="icon" onclick="show('hours')" id="iconHours">
+    🕒
   </div>
+
 </div>
 
-<!-- טיפולים -->
+<!-- סוגי פגישות -->
 
-<div id="treatments" class="section active">
+<div id="types" class="section active">
 
-  <input id="name" placeholder="שם טיפול">
+  <input id="name" placeholder="שם פגישה">
   <input id="duration" type="number" placeholder="משך בדקות">
 
-<button onclick="add()">הוסף טיפול</button>
+<button onclick="add()">הוסף</button>
 
   <div class="list" id="list"></div>
 
@@ -146,7 +137,7 @@ button {
 
 <div id="hours" class="section">
 
-  <p>כאן נבנה יומן יפה בשלב הבא</p>
+  <p>כאן ייבנה היומן בשלב הבא</p>
 
 </div>
 
@@ -155,20 +146,22 @@ button {
 <script>
 
 function show(section) {
-  document.getElementById("treatments").classList.remove("active");
+  document.getElementById("types").classList.remove("active");
   document.getElementById("hours").classList.remove("active");
 
   document.getElementById(section).classList.add("active");
 
-  document.getElementById("icon1").classList.remove("active");
-  document.getElementById("icon2").classList.remove("active");
+  document.getElementById("iconTypes").classList.remove("active");
+  document.getElementById("iconHours").classList.remove("active");
 
-  if (section === "treatments") {
-    document.getElementById("icon1").classList.add("active");
+  if (section === "types") {
+    document.getElementById("iconTypes").classList.add("active");
   } else {
-    document.getElementById("icon2").classList.add("active");
+    document.getElementById("iconHours").classList.add("active");
   }
 }
+
+/* סוגי פגישות */
 
 function add() {
   const name = document.getElementById("name").value;
@@ -179,23 +172,23 @@ function add() {
     return;
   }
 
-  const data = JSON.parse(localStorage.getItem("treatments")) || [];
+  const data = JSON.parse(localStorage.getItem("types")) || [];
 
   data.push({name, duration});
-  localStorage.setItem("treatments", JSON.stringify(data));
+  localStorage.setItem("types", JSON.stringify(data));
 
   showList();
 }
 
 function del(i) {
-  const data = JSON.parse(localStorage.getItem("treatments")) || [];
+  const data = JSON.parse(localStorage.getItem("types")) || [];
   data.splice(i,1);
-  localStorage.setItem("treatments", JSON.stringify(data));
+  localStorage.setItem("types", JSON.stringify(data));
   showList();
 }
 
 function showList() {
-  const data = JSON.parse(localStorage.getItem("treatments")) || [];
+  const data = JSON.parse(localStorage.getItem("types")) || [];
   const list = document.getElementById("list");
 
   list.innerHTML = "";
