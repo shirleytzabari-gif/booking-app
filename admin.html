@@ -137,9 +137,17 @@ button {
 
 <div id="hours" class="section">
 
-  <p>כאן ייבנה היומן בשלב הבא</p>
+  <input type="date" id="date">
+
+  <input type="time" id="start">
+  <input type="time" id="end">
+
+<button onclick="save()">שמור</button>
+
+  <div class="list" id="hoursList"></div>
 
 </div>
+
 
 </div>
 
@@ -209,3 +217,35 @@ showList();
 
 </body>
 </html>
+
+function save() {
+const date = document.getElementById("date").value;
+const start = document.getElementById("start").value;
+const end = document.getElementById("end").value;
+
+if (!date || !start || !end) {
+alert("מלאי הכל");
+return;
+}
+
+const data = JSON.parse(localStorage.getItem("hours")) || [];
+
+data.push({date, start, end});
+
+localStorage.setItem("hours", JSON.stringify(data));
+
+showHours();
+}
+
+function showHours() {
+const data = JSON.parse(localStorage.getItem("hours")) || [];
+const list = document.getElementById("hoursList");
+
+list.innerHTML = "";
+
+data.forEach(h=>{
+list.innerHTML += `<div>${h.date} | ${h.start} - ${h.end}</div>`;
+});
+}
+
+showHours();
