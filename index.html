@@ -57,9 +57,19 @@ button {
 
   <img src="./LOGOCITA.PNG.png" class="logo">
 
-<button class="primary">קביעת פגישה</button> <button class="secondary">כניסת מנהל</button>
+<button class="primary" onclick="goToPatient()">קביעת פגישה</button> <button class="secondary" onclick="goToAdmin()">כניסת מנהל</button>
 
 </div>
+
+<script>
+  function goToPatient() {
+    window.location.href = "patient.html";
+  }
+
+  function goToAdmin() {
+    window.location.href = "admin.html";
+  }
+</script>
 
 </body>
 </html>
