@@ -3,7 +3,7 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>ניהול תורים</title>
+  <title>ניהול מטפל</title>
   <style>
     body {
       font-family: Arial;
@@ -24,8 +24,8 @@
 
 input {
   width: 100%;
-  padding: 10px;
-  margin: 10px 0;
+  padding: 12px;
+  margin: 8px 0;
   border-radius: 10px;
   border: 1px solid #ccc;
 }
@@ -33,17 +33,28 @@ input {
 button {
   width: 100%;
   padding: 12px;
+  margin-top: 10px;
   border: none;
   border-radius: 12px;
   background: #3b82f6;
   color: white;
   cursor: pointer;
+}
+
+.link {
   margin-top: 10px;
+  color: #3b82f6;
+  cursor: pointer;
+  display: block;
+}
+
+.hidden {
+  display: none;
 }
 
 .list {
-  margin-top: 20px;
   text-align: right;
+  margin-top: 15px;
   font-size: 14px;
 }
 ```
@@ -54,51 +65,113 @@ button {
 
 <div class="container">
 
-  <h2>ניהול זמינות</h2>
+  <h2 id="title">כניסת מנהל</h2>
 
-  <input type="date" id="date">
-  <input type="text" id="times" placeholder="שעות מופרדות בפסיק לדוגמה 09:00,10:00">
+  <div id="auth">
 
-<button onclick="save()">שמור זמינות</button>
+```
+<input id="email" type="email" placeholder="אימייל">
+<input id="password" type="password" placeholder="סיסמה">
 
-  <div class="list" id="list"></div>
+<button onclick="handleAuth()">כניסה</button>
+
+<span class="link" onclick="toggleAuth()">אין לך חשבון? הרשמה</span>
+```
+
+  </div>
+
+  <div id="dashboard" class="hidden">
+
+```
+<h3>סוגי טיפולים</h3>
+
+<input id="treatmentName" type="text" placeholder="שם טיפול">
+<input id="duration" type="number" placeholder="משך בדקות">
+
+<button onclick="addTreatment()">הוסף טיפול</button>
+
+<div class="list" id="treatmentsList"></div>
+```
+
+  </div>
 
 </div>
 
 <script>
 
-function save() {
-  const date = document.getElementById("date").value;
-  const times = document.getElementById("times").value.split(",");
+let isRegister = false;
 
-  if (!date || times.length === 0) {
-    alert("יש למלא תאריך ושעות");
+function toggleAuth() {
+  isRegister = !isRegister;
+
+  document.getElementById("title").innerText = isRegister ? "הרשמת מנהל" : "כניסת מנהל";
+  document.querySelector("button").innerText = isRegister ? "הרשמה" : "כניסה";
+  document.querySelector(".link").innerText = isRegister ? "יש לך חשבון? כניסה" : "אין לך חשבון? הרשמה";
+}
+
+function handleAuth() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    alert("יש למלא את כל השדות");
     return;
   }
 
-  const data = JSON.parse(localStorage.getItem("availability")) || {};
+  let admin = JSON.parse(localStorage.getItem("admin"));
 
-  data[date] = times;
+  if (isRegister) {
+    admin = { email, password };
+    localStorage.setItem("admin", JSON.stringify(admin));
+    alert("נרשמת בהצלחה");
+  } else {
+    if (!admin || email !== admin.email || password !== admin.password) {
+      alert("פרטים שגויים");
+      return;
+    }
+    alert("התחברת בהצלחה");
+  }
 
-  localStorage.setItem("availability", JSON.stringify(data));
+  document.getElementById("auth").classList.add("hidden");
+  document.getElementById("dashboard").classList.remove("hidden");
 
-  alert("נשמר בהצלחה");
-
-  show();
+  showTreatments();
 }
 
-function show() {
-  const data = JSON.parse(localStorage.getItem("availability")) || {};
-  const list = document.getElementById("list");
+function addTreatment() {
+  const name = document.getElementById("treatmentName").value;
+  const duration = document.getElementById("duration").value;
+
+  if (!name || !duration) {
+    alert("יש למלא את כל השדות");
+    return;
+  }
+
+  const treatments = JSON.parse(localStorage.getItem("treatments")) || [];
+
+  treatments.push({
+    name: name,
+    duration: duration
+  });
+
+  localStorage.setItem("treatments", JSON.stringify(treatments));
+
+  document.getElementById("treatmentName").value = "";
+  document.getElementById("duration").value = "";
+
+  showTreatments();
+}
+
+function showTreatments() {
+  const treatments = JSON.parse(localStorage.getItem("treatments")) || [];
+  const list = document.getElementById("treatmentsList");
 
   list.innerHTML = "";
 
-  for (let date in data) {
-    list.innerHTML += `<div>${date} : ${data[date].join(", ")}</div>`;
-  }
+  treatments.forEach(t => {
+    list.innerHTML += `<div>${t.name} - ${t.duration} דקות</div>`;
+  });
 }
-
-show();
 
 </script>
 
