@@ -17,7 +17,7 @@ body {
 
 .container {
   width: 100%;
-  max-width: 420px;
+  max-width: 500px;
   text-align: center;
 }
 
@@ -55,9 +55,9 @@ body {
 
 input {
   width: 100%;
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 12px;
+  padding: 10px;
+  margin: 6px 0;
+  border-radius: 10px;
   border: 1px solid #ddd;
 }
 
@@ -73,7 +73,7 @@ button {
 }
 
 .list {
-  margin-top: 15px;
+  margin-top: 10px;
   text-align: right;
 }
 
@@ -81,44 +81,42 @@ button {
   background: white;
   padding: 10px;
   border-radius: 10px;
-  margin-top: 8px;
+  margin-top: 6px;
   display: flex;
   justify-content: space-between;
 }
 
-.delete {
-  color: red;
-  cursor: pointer;
+/* יומן שבועי */
+
+.week-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 0;
 }
 
-.calendar {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  margin-bottom: 15px;
+.week-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
 }
 
 .day {
-  min-width: 70px;
+  background: white;
   padding: 10px;
   border-radius: 10px;
-  background: white;
   cursor: pointer;
-}
-
-.day.holiday {
-  background: #fef3c7;
+  font-size: 14px;
 }
 
 .day.selected {
   border: 2px solid #3b82f6;
 }
 
-#holidayName {
-  margin-bottom: 10px;
-  font-weight: bold;
-  color: #92400e;
+.day.holiday {
+  background: #fef3c7;
 }
+
 </style>
 
 </head>
@@ -133,6 +131,8 @@ button {
   <div class="icon" onclick="show('hours')" id="iconHours">🕒</div>
 </div>
 
+<!-- סוגים -->
+
 <div id="types" class="section active">
 
   <input id="name" placeholder="שם פגישה">
@@ -144,25 +144,31 @@ button {
 
 </div>
 
+<!-- שעות -->
+
 <div id="hours" class="section">
 
-  <div id="holidayName"></div>
+  <div class="week-header">
+    <button onclick="changeWeek(-1)">◀</button>
+    <div id="weekTitle"></div>
+    <button onclick="changeWeek(1)">▶</button>
+  </div>
 
-  <div class="calendar" id="calendar"></div>
+  <div class="week-days" id="weekDays"></div>
 
-  <input type="date" id="date">
   <input type="time" id="start">
   <input type="time" id="end">
 
-<button onclick="save()">שמור</button>
-
-  <div class="list" id="hoursList"></div>
+<button onclick="save()">שמור שעות</button>
 
 </div>
 
 </div>
 
 <script>
+
+let currentDate = new Date();
+let selectedDate = null;
 
 function show(section) {
   document.getElementById("types").classList.remove("active");
@@ -180,6 +186,8 @@ function show(section) {
   }
 }
 
+/* סוגי פגישות */
+
 function add() {
   const name = document.getElementById("name").value;
   const duration = document.getElementById("duration").value;
@@ -190,17 +198,9 @@ function add() {
   }
 
   const data = JSON.parse(localStorage.getItem("types")) || [];
-
   data.push({name, duration});
   localStorage.setItem("types", JSON.stringify(data));
 
-  showList();
-}
-
-function del(i) {
-  const data = JSON.parse(localStorage.getItem("types")) || [];
-  data.splice(i,1);
-  localStorage.setItem("types", JSON.stringify(data));
   showList();
 }
 
@@ -214,52 +214,30 @@ function showList() {
     list.innerHTML += `
       <div class="item">
         <div>${t.name} - ${t.duration} דק</div>
-        <div class="delete" onclick="del(${i})">✖</div>
       </div>
     `;
   });
 }
 
-function save() {
-  const date = document.getElementById("date").value;
-  const start = document.getElementById("start").value;
-  const end = document.getElementById("end").value;
+/* יומן */
 
-  if (!date || !start || !end) {
-    alert("מלאי הכל");
-    return;
-  }
-
-  const data = JSON.parse(localStorage.getItem("hours")) || [];
-
-  data.push({date, start, end});
-  localStorage.setItem("hours", JSON.stringify(data));
-
-  showHours();
+function getWeekStart(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day;
+  return new Date(d.setDate(diff));
 }
 
-function showHours() {
-  const data = JSON.parse(localStorage.getItem("hours")) || [];
-  const list = document.getElementById("hoursList");
+async function renderWeek() {
+  const container = document.getElementById("weekDays");
+  container.innerHTML = "";
 
-  list.innerHTML = "";
+  const start = getWeekStart(currentDate);
 
-  data.forEach(h=>{
-    list.innerHTML += `
-      <div class="item">
-        <div>${h.date} | ${h.start} - ${h.end}</div>
-      </div>
-    `;
-  });
-}
+  document.getElementById("weekTitle").innerText =
+    start.toLocaleDateString("he-IL");
 
-async function renderCalendar() {
-  const calendar = document.getElementById("calendar");
-  calendar.innerHTML = "";
-
-  const today = new Date();
-
-  const res = await fetch("https://www.hebcal.com/hebcal?v=1&cfg=json&maj=on&i=on&lg=he&year=" + today.getFullYear());
+  const res = await fetch("https://www.hebcal.com/hebcal?v=1&cfg=json&i=on&lg=he&year=" + currentDate.getFullYear());
   const data = await res.json();
 
   const holidays = {};
@@ -268,8 +246,8 @@ async function renderCalendar() {
   });
 
   for (let i = 0; i < 7; i++) {
-    const d = new Date();
-    d.setDate(today.getDate() + i);
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
 
     const dateStr = d.toISOString().split("T")[0];
     const dayName = d.toLocaleDateString("he-IL", { weekday: "short" });
@@ -281,24 +259,49 @@ async function renderCalendar() {
       div.classList.add("holiday");
     }
 
-    div.innerHTML = `${dayName}<br>${d.getDate()}/${d.getMonth()+1}`;
+    div.innerHTML = `${dayName}<br>${d.getDate()}`;
 
     div.onclick = () => {
-      document.getElementById("date").value = dateStr;
+      selectedDate = dateStr;
 
       document.querySelectorAll(".day").forEach(d=>d.classList.remove("selected"));
       div.classList.add("selected");
-
-      document.getElementById("holidayName").innerText = holidays[dateStr] || "";
     };
 
-    calendar.appendChild(div);
+    container.appendChild(div);
   }
 }
 
+function changeWeek(offset) {
+  currentDate.setDate(currentDate.getDate() + (offset * 7));
+  renderWeek();
+}
+
+/* שמירת שעות */
+
+function save() {
+  if (!selectedDate) {
+    alert("בחרי יום");
+    return;
+  }
+
+  const start = document.getElementById("start").value;
+  const end = document.getElementById("end").value;
+
+  if (!start || !end) {
+    alert("מלאי שעות");
+    return;
+  }
+
+  const data = JSON.parse(localStorage.getItem("hours")) || [];
+  data.push({date: selectedDate, start, end});
+  localStorage.setItem("hours", JSON.stringify(data));
+
+  alert("נשמר");
+}
+
 showList();
-showHours();
-renderCalendar();
+renderWeek();
 
 </script>
 
