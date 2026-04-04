@@ -92,7 +92,16 @@ button {
       return;
     }
 
-    alert("ההרשמה בוצעה בהצלחה");
+    const user = {
+      name: name,
+      birth: birth,
+      email: email,
+      password: password
+    };
+
+    localStorage.setItem("user", JSON.stringify(user));
+
+    alert("ההרשמה נשמרה בהצלחה");
   }
 </script>
 
